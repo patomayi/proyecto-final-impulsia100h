@@ -17,11 +17,11 @@ DATASET_PATH = BASE_DIR / "datos" / "dataset_eco_asistente.csv"
 
 # Traducimos las etiquetas del modelo a nombres de contenedores fáciles de entender.
 NOMBRES_CONTENEDOR = {
-    "papel y cartón": "contenedor azul (papel y cartón)",
-    "vidrio": "contenedor verde (vidrio)",
-    "envases": "contenedor amarillo (envases ligeros)",
-    "orgánico": "contenedor marrón (biorresiduos)",
-    "resto": "contenedor de resto",
+    "papel y cartón": "Contenedor de papel y cartón (azul)",
+    "vidrio": "Contenedor de vidrio (verde)",
+    "envases": "Contenedor de plástico y metal (amarillo)",
+    "orgánico": "Contenedor de biorresiduos (marrón)",
+    "resto": "Contenedor de restos (gris)",
 }
 
 COLORES_CONTENEDOR = {
@@ -36,7 +36,7 @@ ESTILOS_RESULTADO = {
     "papel y cartón": ("#DCEBFA", "#275E95", "#B4D0EC"),
     "vidrio": ("#DDF0E5", "#286847", "#B8D9C3"),
     "envases": ("#FFF1C9", "#775A11", "#EBD58E"),
-    "orgánico": ("#EFE2D8", "#75513A", "#D9C1AE"),
+    "orgánico": ("#80512D", "#FFF8E9", "#654020"),
     "resto": ("#E6EBE9", "#4E5C55", "#CED8D3"),
 }
 
@@ -209,49 +209,82 @@ st.session_state.setdefault("resultado_tipo", None)
 st.markdown(
     """
     <style>
-    :root {
-        --eco-forest: #245b46;
-        --eco-leaf: #397b5b;
-        --eco-sage: #e7f0e8;
-        --eco-cream: #f7f8f3;
-        --eco-ink: #1c2d25;
-        --eco-muted: #607168;
+    [data-testid="stApp"] {
+        --eco-forest: light-dark(#174A34, #B7DCC0);
+        --eco-leaf: light-dark(#3D714C, #83BD91);
+        --eco-sage: light-dark(#E8EBD9, #26342A);
+        --eco-cream: light-dark(#F6F0DF, #141D17);
+        --eco-page-top: light-dark(#F2EBDD, #101814);
+        --eco-page-bottom: light-dark(#F6F0DF, #141D17);
+        --eco-card: light-dark(#FFFCF4, #1B2820);
+        --eco-card-border: light-dark(#D9C9A9, #405446);
+        --eco-input: light-dark(#FFFEFA, #26332B);
+        --eco-ink: light-dark(#2E3027, #F0F2E9);
+        --eco-muted: light-dark(#6D7467, #AAB7AA);
     }
     [data-testid="stAppViewContainer"] {
-        background: radial-gradient(ellipse at 12% 0%, #e8f1e8 0%, #f7f8f3 44%, #f7f8f3 100%);
+        background: linear-gradient(180deg, var(--eco-page-top) 0%, var(--eco-page-bottom) 100%);
         color: var(--eco-ink);
     }
     [data-testid="stHeader"] { background: transparent; }
     .block-container { max-width: 860px; padding-top: 2rem; padding-bottom: 2.5rem; }
     .eco-hero {
-        padding: 1.7rem 1.9rem; margin-bottom: 1.2rem;
-        border: 1px solid #d8e5d8; border-radius: 24px;
-        background: linear-gradient(120deg, rgba(255,255,255,.96), rgba(235,244,235,.94));
-        box-shadow: 0 12px 35px rgba(38, 75, 52, .08);
+        padding: 1.7rem 1.9rem 2.35rem; margin-bottom: 1.2rem;
+        border: 1px solid #315C43; border-radius: 24px;
+        background: linear-gradient(145deg, #123F2D 0%, #20583D 68%, #2C6546 100%);
+        box-shadow: 0 16px 34px rgba(39, 55, 35, .19);
+        text-align: center;
+        overflow: hidden;
+        position: relative;
     }
-    .eco-kicker { color: var(--eco-leaf); font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin-bottom: .4rem; }
-    .eco-hero h1 { color: var(--eco-forest); font-size: clamp(2rem, 5vw, 3rem); line-height: 1.05; margin: 0 0 .55rem 0; font-weight: 800; }
-    .eco-hero p { color: var(--eco-muted); font-size: 1rem; margin: 0; }
-    [data-testid="stVerticalBlockBorderWrapper"] { border-color: #dce6dd !important; border-radius: 18px !important; background: rgba(255,255,255,.86); box-shadow: 0 7px 22px rgba(38, 75, 52, .045); }
+    .eco-hero-plant { position: absolute; right: 5%; bottom: 1.1rem; width: 70px; height: 84px; opacity: .9; pointer-events: none; }
+    .eco-hero h1 { color: #FFF9E9; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(2.4rem, 6vw, 3.6rem); line-height: 1.05; margin: 0 0 1rem 0; font-weight: 800; }
+    .eco-hero h2 { color: #FFF9E9; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(1rem, 4.2vw, 2.4rem); line-height: 1.12; white-space: nowrap; margin: 0 0 .8rem 0; font-weight: 700; }
+    .eco-hero p { color: #E4E9D6; font-size: 1rem; margin: 0; }
+    .eco-hero::after {
+        content: ""; position: absolute; left: -3%; bottom: -1px; width: 106%; height: 18px;
+        background: var(--eco-page-bottom); border-radius: 55% 55% 0 0 / 100% 100% 0 0;
+        box-shadow: 0 -3px 0 rgba(185, 139, 77, .8);
+    }
+    @media (max-width: 560px) { .eco-hero-plant { width: 42px; height: 58px; right: 3%; opacity: .65; } }
+    [data-testid="stVerticalBlockBorderWrapper"] { border: 1px solid var(--eco-card-border) !important; border-radius: 20px !important; background: var(--eco-card) !important; box-shadow: 0 9px 24px rgba(30, 42, 32, .12); }
+    .st-key-search-card, .st-key-explore-card,
+    [data-testid="stVerticalBlockBorderWrapper"]:has(.st-key-search-card),
+    [data-testid="stVerticalBlockBorderWrapper"]:has(.st-key-explore-card) {
+        border: 1px solid var(--eco-card-border) !important;
+        border-radius: 22px !important;
+        background: var(--eco-card) !important;
+        box-shadow: 0 12px 28px rgba(30, 42, 32, .14) !important;
+    }
+    .st-key-search-card, .st-key-explore-card {
+        padding: .8rem 1.05rem !important;
+    }
+    [data-testid="stTextInputRootElement"],
     [data-testid="stTextInputRootElement"] > div,
-    [data-testid="stTextInputRootElement"] [data-baseweb="input"] {
-        background-color: #FFFFFF !important; border-color: #C9D8CB !important;
+    [data-testid="stTextInputRootElement"] [data-baseweb="input"],
+    [data-testid="stTextInput"] [data-baseweb="input"],
+    div[data-baseweb="input"], div[data-baseweb="base-input"] {
+        background: var(--eco-input) !important;
+        border-color: var(--eco-card-border) !important;
     }
+    [data-testid="stTextInput"] input,
     [data-testid="stTextInputRootElement"] input,
-    [data-testid="stTextInput"] input {
+    input[type="text"] {
         min-height: 3rem; border-radius: 12px;
-        background-color: #FFFFFF !important; color: #1C2D25 !important;
-        -webkit-text-fill-color: #1C2D25 !important; caret-color: #1C2D25 !important;
-        font-size: 1rem;
+        background: var(--eco-input) !important; background-color: var(--eco-input) !important;
+        color: var(--eco-ink) !important; -webkit-text-fill-color: var(--eco-ink) !important;
+        caret-color: var(--eco-ink) !important; font-size: 1rem;
+        opacity: 1 !important;
     }
+    [data-testid="stTextInput"] input::placeholder,
     [data-testid="stTextInputRootElement"] input::placeholder,
-    [data-testid="stTextInput"] input::placeholder {
-        color: #78877D !important; -webkit-text-fill-color: #78877D !important; opacity: 1;
+    input[type="text"]::placeholder {
+        color: var(--eco-muted) !important; -webkit-text-fill-color: var(--eco-muted) !important; opacity: 1;
     }
     [data-testid="stTextInput"] label,
     [data-testid="stTextInput"] label p,
     [data-testid="stWidgetLabel"] p {
-        color: #1C2D25 !important; -webkit-text-fill-color: #1C2D25 !important;
+        color: var(--eco-ink) !important; -webkit-text-fill-color: var(--eco-ink) !important;
     }
     [data-testid="stTextInputRootElement"] input:focus { border-color: var(--eco-leaf); box-shadow: 0 0 0 .15rem rgba(57,123,91,.14); }
     [data-testid="stBaseButton-primary"] {
@@ -262,36 +295,46 @@ st.markdown(
     [data-testid="stBaseButton-primary"]:hover { background: var(--eco-leaf) !important; }
     [data-testid="stBaseButton-secondary"] {
         min-height: 2.5rem; border-radius: 12px !important;
-        border: 1px solid #c9d8cb !important; background: #edf3ed !important;
+        border: 1px solid var(--eco-card-border) !important; background: var(--eco-sage) !important;
         color: var(--eco-forest) !important; font-weight: 700;
     }
     [data-testid="stBaseButton-secondary"] p { color: var(--eco-forest) !important; }
-    [data-testid="stBaseButton-secondary"]:hover { background: #dfeae0 !important; border-color: #9eb9a3 !important; }
+    [data-testid="stBaseButton-secondary"]:hover { background: var(--eco-cream) !important; border-color: var(--eco-leaf) !important; }
     .eco-result {
-        display: flex; flex-direction: column; gap: .2rem;
-        border: 1px solid; border-left-width: 6px; border-radius: 14px;
-        padding: 1rem 1.1rem; margin: .35rem 0 .8rem 0;
+        position: relative; display: flex; flex-direction: row; align-items: center; gap: .8rem;
+        width: min(100%, 350px); min-height: 96px; box-sizing: border-box;
+        border: 1px solid; border-left-width: 5px; border-radius: 14px;
+        padding: .8rem 2.6rem .8rem .8rem; margin: .35rem auto .8rem auto;
     }
-    .eco-result-label { font-size: .78rem; font-weight: 700; opacity: .84; }
-    .eco-result-value { font-size: 1.12rem; font-weight: 800; line-height: 1.35; }
+    .eco-search-title { text-align: center; color: var(--eco-forest); margin-top: 0; }
+    .eco-bin-art { display: block; flex: 0 0 54px; width: 54px; height: 64px; }
+    .eco-plant-art { display: block; position: absolute; top: 5px; right: 7px; width: 30px; height: 34px; }
+    .eco-result-copy { display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+    .eco-result-label { font-size: .72rem; font-weight: 700; opacity: .9; }
+    .eco-result-value { font-size: .94rem; font-weight: 800; line-height: 1.3; }
+    @media (max-width: 560px) {
+        .eco-result { gap: .6rem; padding: .7rem 2.3rem .7rem .7rem; min-height: 88px; }
+        .eco-bin-art { flex-basis: 48px; width: 48px; height: 58px; }
+        .eco-result-value { font-size: .9rem; }
+    }
     [data-testid="stAlert"] { border-radius: 14px; }
     [data-testid="stAlert"] [data-testid="stMarkdownContainer"],
     [data-testid="stAlert"] [data-testid="stMarkdownContainer"] p {
-        color: #1C2D25 !important;
+        color: var(--eco-ink) !important;
     }
-    [data-testid="stExpander"] { border: 1px solid #dce6dd; border-radius: 16px; background: #FFFFFF; overflow: hidden; }
+    [data-testid="stExpander"] { border: 1px solid var(--eco-card-border); border-radius: 16px; background: var(--eco-card); overflow: hidden; }
     [data-testid="stExpander"] details > summary {
-        background: #EDF4ED !important; color: #245B46 !important;
+        background: var(--eco-sage) !important; color: var(--eco-forest) !important;
         border-radius: 15px; font-weight: 700;
     }
     [data-testid="stExpander"] details > summary p,
     [data-testid="stExpander"] details > summary span,
     [data-testid="stExpander"] details > summary svg {
-        color: #245B46 !important; fill: #245B46 !important;
+        color: var(--eco-forest) !important; fill: var(--eco-forest) !important;
     }
-    [data-testid="stExpander"] details[open] > summary { border-bottom: 1px solid #DCE6DD; border-radius: 15px 15px 0 0; }
-    h2, h3 { color: var(--eco-forest); }
-    .eco-footer { color: #718077; font-size: .78rem; text-align: center; padding-top: .5rem; }
+    [data-testid="stExpander"] details[open] > summary { border-bottom: 1px solid var(--eco-card-border); border-radius: 15px 15px 0 0; }
+    h2, h3 { color: var(--eco-forest); font-family: Georgia, 'Times New Roman', serif; }
+    .eco-footer { color: var(--eco-muted); font-size: .78rem; text-align: center; padding-top: .5rem; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -390,6 +433,16 @@ def detectar_categoria_o_punto_limpio(residuo, modelo=None, datos=None):
     return modelo.predict([texto])[0]
 
 
+SVG_CONTENEDOR_PLANTA = """<svg class="eco-bin-art" viewBox="0 0 64 72" role="img" aria-label="Contenedor de reciclaje">
+<path d="M13 18h38l-3.5 46h-31L13 18Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/>
+<path d="M9 14h46M23 14l2-6h14l2 6M23 68v2m18-2v2" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="17" y="49" font-size="25" fill="currentColor" font-family="Arial, sans-serif">♻</text>
+</svg><svg class="eco-plant-art" viewBox="0 0 40 44" role="img" aria-label="Plantita">
+<path d="M18 37c1-9 2-17 9-25" fill="none" stroke="#55783D" stroke-width="3" stroke-linecap="round"/>
+<path d="M24 15C15 16 10 12 9 5c8-2 14 2 15 10Zm3-4C29 4 34 1 39 2c0 7-4 12-12 12Z" fill="#A8C76E" stroke="#55783D" stroke-width="2" stroke-linejoin="round"/>
+</svg>"""
+
+
 def mostrar_resultado(categoria, tipo_detectado=None):
     with st.container(border=True):
         st.markdown("#### Resultado")
@@ -398,11 +451,11 @@ def mostrar_resultado(categoria, tipo_detectado=None):
         if categoria == MENSAJE_PUNTO_LIMPIO:
             st.markdown(
                 '<div class="eco-result" style="background:#FCE4E4;color:#973F3F;border-color:#EFBDBD;">'
-                '<span class="eco-result-label">Orientación</span>'
-                '<span class="eco-result-value">Ir al punto limpio</span></div>',
+                f'{SVG_CONTENEDOR_PLANTA}'
+                '<div class="eco-result-copy"><span class="eco-result-label">Orientación</span>'
+                '<span class="eco-result-value">Ir al punto limpio</span></div></div>',
                 unsafe_allow_html=True,
             )
-            st.write("Este residuo no aparece en las categorías del modelo. Prueba con una descripción más concreta.")
         else:
             fondo, texto_color, borde = ESTILOS_RESULTADO.get(
                 categoria, ("#EEF2EF", "#33443B", "#D6E0D8")
@@ -410,8 +463,9 @@ def mostrar_resultado(categoria, tipo_detectado=None):
             destino = NOMBRES_CONTENEDOR.get(categoria, categoria)
             st.markdown(
                 f'<div class="eco-result" style="background:{fondo};color:{texto_color};border-color:{borde};">'
-                f'<span class="eco-result-label">Deposítalo en</span>'
-                f'<span class="eco-result-value">{destino}</span></div>',
+                f'{SVG_CONTENEDOR_PLANTA}'
+                f'<div class="eco-result-copy"><span class="eco-result-label">Deposítalo en</span>'
+                f'<span class="eco-result-value">{destino}</span></div></div>',
                 unsafe_allow_html=True,
             )
             st.write(CONSEJOS.get(categoria, "Consulta las instrucciones de separación locales."))
@@ -490,8 +544,13 @@ if st.session_state["sesion_cerrada"]:
 st.markdown(
     """
     <div class="eco-hero">
-      <div class="eco-kicker">♻ Eco-asistente</div>
-      <h1>Reciclar empieza<br>por identificarlo.</h1>
+      <svg class="eco-hero-plant" viewBox="0 0 64 80" aria-hidden="true">
+        <path d="M29 74c2-19 7-35 20-51" fill="none" stroke="#B9D28A" stroke-width="4" stroke-linecap="round"/>
+        <path d="M43 34C25 37 15 29 14 14c16-3 27 5 29 19Zm7-13C51 6 61 1 63 2c1 15-4 24-14 27Z" fill="#A9C86C" stroke="#D7E6B2" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M34 60C20 62 10 55 8 43c14-2 24 4 27 16Z" fill="#789C53" stroke="#B9D28A" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+      <h1>♻ Eco-asistente</h1>
+      <h2>Reciclar empieza por identificarlo</h2>
       <p>Escribe un residuo y recibe una orientación clara sobre dónde depositarlo.</p>
     </div>
     """,
@@ -504,39 +563,38 @@ except FileNotFoundError as error:
     st.error(str(error))
     st.stop()
 
-with st.container(border=True):
-    st.subheader("¿Qué quieres tirar?")
+with st.container(border=True, key="search-card"):
+    st.markdown('<h3 class="eco-search-title">¿Dónde lo tiramos?</h3>', unsafe_allow_html=True)
     st.caption("Prueba con un nombre y material: botella de plástico, frasco de vidrio o lechuga.")
     residuo = st.text_input(
         "Nombre del residuo",
         placeholder="Ej.: botella de tomate de vidrio",
         label_visibility="collapsed",
     )
-    _, boton_col = st.columns([2.2, 1])
+    _, boton_col, _ = st.columns([1, 1, 1])
     with boton_col:
         consultar = st.button("♻ Clasificar", type="primary", use_container_width=True)
 
-if consultar:
-    if not residuo.strip():
-        st.session_state["residuo_pendiente_material"] = None
-        st.session_state["resultado_categoria"] = None
-        st.session_state["resultado_tipo"] = None
-        st.warning("Escribe un residuo para obtener una orientación.")
-    else:
-        tipo_detectado = detectar_tipo_fruta_vegetal(residuo)
-        categoria = detectar_categoria_o_punto_limpio(residuo, modelo, datos)
-        if categoria == MENSAJE_MATERIAL_INDEFINIDO:
-            st.session_state["residuo_pendiente_material"] = residuo.strip()
-            st.session_state["material_seleccionado"] = "Elige un material"
+    if consultar:
+        if not residuo.strip():
+            st.session_state["residuo_pendiente_material"] = None
             st.session_state["resultado_categoria"] = None
             st.session_state["resultado_tipo"] = None
+            st.warning("Escribe un residuo para obtener una orientación.")
         else:
-            st.session_state["residuo_pendiente_material"] = None
-            st.session_state["resultado_categoria"] = categoria
-            st.session_state["resultado_tipo"] = tipo_detectado
+            tipo_detectado = detectar_tipo_fruta_vegetal(residuo)
+            categoria = detectar_categoria_o_punto_limpio(residuo, modelo, datos)
+            if categoria == MENSAJE_MATERIAL_INDEFINIDO:
+                st.session_state["residuo_pendiente_material"] = residuo.strip()
+                st.session_state["material_seleccionado"] = "Elige un material"
+                st.session_state["resultado_categoria"] = None
+                st.session_state["resultado_tipo"] = None
+            else:
+                st.session_state["residuo_pendiente_material"] = None
+                st.session_state["resultado_categoria"] = categoria
+                st.session_state["resultado_tipo"] = tipo_detectado
 
-if st.session_state["residuo_pendiente_material"]:
-    with st.container(border=True):
+    if st.session_state["residuo_pendiente_material"]:
         st.markdown("#### ¿De qué material es el envase?")
         st.caption(f"Residuo: {st.session_state['residuo_pendiente_material']}")
         opciones_material = [
@@ -568,14 +626,14 @@ if st.session_state["residuo_pendiente_material"]:
                 st.session_state["residuo_pendiente_material"] = None
                 st.rerun()
 
-if st.session_state["resultado_categoria"] is not None:
-    mostrar_resultado(
-        st.session_state["resultado_categoria"],
-        st.session_state["resultado_tipo"],
-    )
+    if st.session_state["resultado_categoria"] is not None:
+        mostrar_resultado(
+            st.session_state["resultado_categoria"],
+            st.session_state["resultado_tipo"],
+        )
 
 # Estas gráficas ayudan a explicar tanto los datos como los aciertos y errores del modelo.
-with st.expander("Ver análisis de datos y evaluación del modelo"):
+with st.expander("📊 Ver análisis de datos y evaluación del modelo"):
     st.caption("Estos gráficos muestran una evaluación fija sobre ejemplos reservados. No cambian al consultar un residuo nuevo.")
     st.subheader("Ejemplos disponibles por categoría")
     conteo_categorias = (
@@ -671,7 +729,7 @@ with st.expander("Ver análisis de datos y evaluación del modelo"):
     st.altair_chart(grafico_matriz, use_container_width=True)
     st.caption("La evaluación es inicial: el dataset es pequeño y las normas pueden variar según el municipio.")
 
-with st.container(border=True):
+with st.container(border=True, key="explore-card"):
     st.subheader("Explora la decisión")
     st.caption("Escribe un producto para ver la categoría y qué camino usó la app: CSV, regla o modelo.")
     producto_explicacion = st.text_input(
@@ -700,6 +758,7 @@ with st.container(border=True):
                 st.write(f"**Qué influyó:** {detalle}")
 
 st.markdown('<div class="eco-footer">Proyecto educativo · Orientación de reciclaje</div>', unsafe_allow_html=True)
+st.markdown('<div class="eco-footer">®2026 - Emma, Maria y Priscila</div>', unsafe_allow_html=True)
 
 st.divider()
 st.button("Salir", on_click=cerrar_sesion, help="Cierra esta sesión y borra sus datos.")
